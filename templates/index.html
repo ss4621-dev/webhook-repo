@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Github Events</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      .event {
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+      }
+      .push {
+        color: #2cbe4e;
+      }
+      .pr {
+        color: #0366d6;
+      }
+      .merge {
+        color: #6f42c1;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Recent Github Events</h1>
+    <div id="events-container"></div>
+
+    <script>
+      function formatTimeStamp(date) {
+        const options = {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          timeZone: "UTC",
+          timeZoneName: "short",
+        };
+        return new Date(date).toLocaleString("en-US", options);
+      }
+
+      function fetchEvents() {
+        fetch("/events")
+          .then((response) => response.json())
+          .then((events) => {
+            const container = document.getElementById("events-container");
+            container.innerHTML = "";
+
+            events.forEach((event) => {
+              const div = document.createElement("div");
+              div.className = `event ${event.action.toLowerCase()}`;
+
+              if (event.action === "PUSH") {
+                div.innerHTML = `
+                <strong>${event.author}</strong>
+                merged branch
+                <strong>${event.from_branch}</strong>
+                <strong>${event.to_branch}</strong>
+                on ${formatTimeStamp(event.timestamp)}
+                `;
+              }
+
+              container.appendChild(div);
+            });
+          });
+      }
+
+      // Fetch events every 15 seconds
+      setInterval(fetchEvents, 15000);
+      fetchEvents(); //Initial load
+    </script>
+  </body>
+</html>
